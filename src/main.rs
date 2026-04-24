@@ -1,7 +1,5 @@
 use anyhow::Result;
-use cairo::{Context, Format, ImageSurface};
 use log::warn;
-use pango::FontDescription;
 use shared_structures::SharedRingBuffer;
 use std::env;
 use std::sync::Arc;
@@ -18,8 +16,11 @@ use tao::{
 };
 
 use xbar_core::{
-    AppState, BarConfig, Color, ShapeStyle, ThemeMode, colors_for_theme, draw_bar,
-    initialize_logging, spawn_shared_eventfd_notifier,
+    AppState, BarConfig, Color, ShapeStyle, ThemeMode,
+    cairo::{self, Context, Format, ImageSurface},
+    colors_for_theme, draw_bar, initialize_logging,
+    pango::FontDescription,
+    spawn_shared_eventfd_notifier,
 };
 
 fn tuned_colors_for_theme(mode: ThemeMode) -> xbar_core::Colors {
@@ -837,7 +838,7 @@ impl App {
 fn main() -> Result<()> {
     // 参数
     let args: Vec<String> = env::args().collect();
-    let shared_path = args.get(1).cloned().unwrap_or_default();
+    let shared_path = args.iter().skip(1).last().cloned().unwrap_or_default();
 
     // 日志
     if let Err(e) = initialize_logging("tao_wgpu_bar", &shared_path) {
